@@ -2151,7 +2151,9 @@ int spc_lu_init(struct scsi_lu *lu)
 	lu_vpd[pg]->vpd_update = update_vpd_b2;
 	lu_vpd[pg]->vpd_update(lu, NULL);
 
-
+/** comment by hy 2020-09-21
+ * # 
+ */
 	lu->dev_type_template.lu_offline(lu);
 
 	return 0;

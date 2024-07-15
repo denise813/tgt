@@ -29,22 +29,40 @@ struct target {
 	enum scsi_target_state target_state;
 
 	struct list_head target_siblings;
-
+/** comment by hy 2020-09-23
+ * # 需要下盘的信息
+ */
 	struct list_head device_list;
 
+/** comment by hy 2020-09-23
+ * # 起来后log时候重新建立
+ */
 	struct list_head it_nexus_list;
 
+/** comment by hy 2020-09-23
+ * # 可以下盘
+ */
 	struct backingstore_template *bst;
 
+/** comment by hy 2020-09-23
+ * # 需要下盘
+ */
 	struct list_head acl_list;
-
+/** comment by hy 2020-09-23
+ * # 需要下盘
+ */
 	struct list_head iqn_acl_list;
 
 	struct tgt_account account;
-
+/** comment by hy 2020-09-23
+ * # 起来时需要建立关系
+ */
 	struct list_head lld_siblings;
 };
 
+/** comment by hy 2020-09-20
+ * # SCSI启动设备角色和SCSI目标设备角色之间关系
+ */
 struct it_nexus {
 	uint64_t itn_id;
 	long ctime;

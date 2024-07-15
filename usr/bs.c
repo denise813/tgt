@@ -172,6 +172,9 @@ static void bs_thread_request_done(int fd, int events, void *data)
 		dprintf("back to tgtd, %p\n", cmd);
 
 		list_del(&cmd->bs_list);
+/** comment by hy 2020-09-19
+ * # 
+ */
 		target_cmd_io_done(cmd, scsi_get_result(cmd));
 	}
 
@@ -240,9 +243,15 @@ static void *bs_thread_worker_fn(void *arg)
 		list_del(&cmd->bs_list);
 		pthread_cleanup_pop(1); /* Unlock pending_lock mutex */
 
+/** comment by hy 2020-09-21
+ * # 调用其处理换上
+ */
 		info->request_fn(cmd);
 
 		pthread_mutex_lock(&finished_lock);
+/** comment by hy 2020-09-21
+ * # 处理完成之后加入完成队列
+ */
 		list_add_tail(&cmd->bs_list, &finished_list);
 		pthread_mutex_unlock(&finished_lock);
 
@@ -261,6 +270,9 @@ static int bs_init_signalfd(void)
 	int ret;
 	DIR *dir;
 
+/** comment by hy 2020-09-19
+ * # 后端目录
+ */
 	dir = opendir(BSDIR);
 	if (dir == NULL) {
 		/* not considered an error if there are no modules */
@@ -269,6 +281,9 @@ static int bs_init_signalfd(void)
 	} else {
 		struct dirent *dirent;
 		void *handle;
+/** comment by hy 2020-09-19
+ * # 读取插件目录
+ */
 		while ((dirent = readdir(dir))) {
 			char *soname;
 			void (*register_bs_module)(void);
@@ -299,6 +314,9 @@ static int bs_init_signalfd(void)
 				free(soname);
 				continue;
 			}
+/** comment by hy 2020-09-19
+ * # 加载其模块的注册方法
+ */
 			register_bs_module();
 			free(soname);
 		}
@@ -311,7 +329,7 @@ static int bs_init_signalfd(void)
 	sigaddset(&mask, SIGUSR2);
 	sigprocmask(SIG_BLOCK, &mask, NULL);
 
-	sig_fd = signalfd(-1, &mask, O_NONBLOCK);
+	sig_fd = __signalfd(-1, &mask, 0);
 	if (sig_fd < 0)
 		return 1;
 
@@ -345,12 +363,18 @@ static int bs_init_notify_thread(void)
 		goto close_command_fd;
 	}
 
+/** comment by hy 2020-09-19
+ * # 放入完成,创建epool 对应的句柄,用于处理完成
+ */
 	ret = tgt_event_add(done_fd[0], EPOLLIN, bs_thread_request_done, NULL);
 	if (ret) {
 		eprintf("failed to add epoll event\n");
 		goto close_done_fd;
 	}
 
+/** comment by hy 2020-09-19
+ * # 应答,等待这个通知
+ */
 	ret = pthread_create(&ack_thread, NULL, bs_thread_ack_fn, NULL);
 	if (ret) {
 		eprintf("failed to create an ack thread, %s\n", strerror(ret));
@@ -382,12 +406,18 @@ int bs_init(void)
 {
 	int ret;
 
+/** comment by hy 2020-09-19
+ * # 这里调用了模块注册函数 register_bs_module
+ */
 	ret = bs_init_signalfd();
 	if (!ret) {
 		eprintf("use signalfd notification\n");
 		return 0;
 	}
 
+/** comment by hy 2020-09-19
+ * # 启动通知线程,当完成进行通知,并且启动应答线程
+ */
 	ret = bs_init_notify_thread();
 	if (!ret) {
 		eprintf("use pthread notification\n");
@@ -415,6 +445,9 @@ tgtadm_err bs_thread_open(struct bs_thread_info *info, request_func_t *rfn,
 	pthread_mutex_init(&info->pending_lock, NULL);
 
 	for (i = 0; i < nr_threads; i++) {
+/** comment by hy 2020-09-21
+ * # 创建线程的队列
+ */
 		ret = pthread_create(&info->worker_thread[i], NULL,
 				     bs_thread_worker_fn, info);
 

@@ -62,7 +62,9 @@ struct logarea {
 	union semun semarg;
 };
 
-extern int log_init(char *progname, int size, int daemon, int debug);
+/* modify begin by hy, 2020-09-20, BugId:123 原因: 应该使用 use_logger */
+extern int log_init(char *progname, int size, int use_logger, int debug);
+/* modify end by hy, 2020-09-20 */
 extern void log_close(void);
 extern void dump_logmsg(void *);
 extern void log_warning(const char *fmt, ...)
@@ -75,7 +77,8 @@ extern void log_debug(const char *fmt, ...)
 #ifdef NO_LOGGING
 #define eprintf(fmt, args...)						\
 do {									\
-	fprintf(stderr, "%s: " fmt, program_name, ##args);		\
+	fprintf(stderr, "%s(%d) " fmt,					\
+		__FUNCTION__, __LINE__, ##args);			\
 } while (0)
 
 #define dprintf(fmt, args...)						\

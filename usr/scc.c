@@ -38,11 +38,17 @@
 
 static tgtadm_err scc_lu_init(struct scsi_lu *lu)
 {
+/** comment by hy 2020-09-21
+ * # 
+ */
 	if (spc_lu_init(lu))
 		return TGTADM_NOMEM;
 
 	strncpy(lu->attrs.product_id, "Controller",
 		sizeof(lu->attrs.product_id));
+/** comment by hy 2020-09-21
+ * # 
+ */
 	lu->attrs.version_desc[0] = 0x04C0; /* SBC-3 no version claimed */
 	lu->attrs.version_desc[1] = 0x0960; /* iSCSI */
 	lu->attrs.version_desc[2] = 0x01fb; /* SCC-2 */

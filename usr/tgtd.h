@@ -196,6 +196,9 @@ struct registration {
 	uint8_t pr_type;
 };
 
+/** comment by hy 2020-09-23
+ * # 目标的逻辑磁盘信息
+ */
 struct scsi_lu {
 	int fd;
 	uint64_t addr; /* persistent mapped address */
@@ -206,6 +209,9 @@ struct scsi_lu {
 	unsigned int blk_shift;
 
 	/* the list of devices belonging to a target */
+/** comment by hy 2020-09-23
+ * # 设备信息
+ */
 	struct list_head device_siblings;
 
 	struct list_head lu_itl_info_list;
@@ -331,8 +337,6 @@ extern int lu_prevent_removal(struct scsi_lu *lu);
 extern uint64_t scsi_get_devid(int lid, uint8_t *pdu);
 extern int scsi_cmd_perform(int host_no, struct scsi_cmd *cmd);
 extern void sense_data_build(struct scsi_cmd *cmd, uint8_t key, uint16_t asc);
-extern void sense_data_build_with_info(struct scsi_cmd *cmd, uint8_t key,
-				       uint16_t asc, uint64_t info);
 extern uint64_t scsi_rw_offset(uint8_t *scb);
 extern uint32_t scsi_rw_count(uint8_t *scb);
 extern int scsi_is_io_opcode(unsigned char op);

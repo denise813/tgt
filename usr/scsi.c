@@ -29,7 +29,6 @@
 #include <syscall.h>
 #include <unistd.h>
 #include <linux/fs.h>
-#include <assert.h>
 
 #include "list.h"
 #include "util.h"
@@ -339,28 +338,6 @@ void sense_data_build(struct scsi_cmd *cmd, uint8_t key, uint16_t asc)
 	}
 }
 
-void sense_data_build_with_info(struct scsi_cmd *cmd, uint8_t key, uint16_t asc,
-				uint64_t info)
-{
-	sense_data_build(cmd, key, asc);
-
-	if (cmd->dev->attrs.sense_format) {
-		/* descriptor format, append as first sense data descriptor */
-		assert(cmd->sense_buffer[7] == 0);
-		cmd->sense_buffer[7] = 12;	/* ADDITIONAL SENSE LENGTH */
-		uint8_t *sdd = &cmd->sense_buffer[8];
-		sdd[0] = 0x00;				/* DESCRIPTOR TYPE */
-		sdd[1] = 0x0a;				/* ADDITIONAL LENGTH */
-		sdd[2] = 0x80;				/* VALID */
-		put_unaligned_be64(info, &sdd[4]);	/* INFORMATION */
-	} else if (info <= UINT32_MAX) {
-		/* fixed format. info field is only 32-bit */
-		cmd->sense_buffer[0] |= 0x80;		/* VALID */
-		put_unaligned_be32((uint32_t)info,
-				&cmd->sense_buffer[3]);	/* INFORMATION */
-	}
-}
-
 #define        TGT_INVALID_DEV_ID      ~0ULL
 
 static uint64_t __scsi_get_devid(uint8_t *p)
@@ -512,11 +489,17 @@ int scsi_cmd_perform(int host_no, struct scsi_cmd *cmd)
 		 * We don't support ACA. SAM-3 and SAM-4 say that a
 		 * logical unit MAY support ACA.
 		 */
+/** comment by hy 2020-09-20
+ * # 
+ */
 		sense_data_build(cmd,
 				 ILLEGAL_REQUEST, ASC_INVALID_FIELD_IN_CDB);
 		return SAM_STAT_CHECK_CONDITION;
 	}
 
+/** comment by hy 2020-09-20
+ * # scsi 命令
+ */
 	if (cmd->dev->lun != cmd->dev_id) {
 		switch (op) {
 		case INQUIRY:
@@ -561,6 +544,20 @@ int scsi_cmd_perform(int host_no, struct scsi_cmd *cmd)
 		return SAM_STAT_CHECK_CONDITION;
 	}
 
+/** comment by hy 2020-09-20
+ * # 进行命令
+     dev_type_template 包括以下类型
+     TYPE_PT sg_template
+     TYPE_MMC mmc_template
+     TYPE_OSD osd_template
+     TYPE_DISK sbc_template
+     TYPE_RAID scc_template
+     TYPE_MEDIUM_CHANGER smc_template
+     TYPE_TAPE ssc_template
+
+     rbd 为例子 target_cmd_perform
+     TYPE_DISK sbc_template op = sbc_rw
+ */
 	return cmd->dev->dev_type_template.ops[op].cmd_perform(host_no, cmd);
 }
 

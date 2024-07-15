@@ -38,6 +38,10 @@ int iscsi_init(int index, char *args)
 
 	lld_index = index;
 
+/** comment by hy 2020-09-19
+ * # 这里有 iscsi_tcp
+     iscsi_tcp_init
+ */
 	list_for_each_entry(t, &iscsi_transport_list,
 			    iscsi_transport_siblings) {
 		err = t->ep_init();

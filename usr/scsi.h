@@ -61,7 +61,7 @@
 #define WRITE_LONG            0x3f
 #define CHANGE_DEFINITION     0x40
 #define WRITE_SAME            0x41
-#define UNMAP		      0x42
+#define UNMAP		          0x42		//Need soppurt by vmware
 #define READ_TOC              0x43
 #define GET_CONFIGURATION     0x46
 #define LOG_SELECT            0x4c
@@ -77,15 +77,17 @@
 #define PERSISTENT_RESERVE_IN 0x5e
 #define PERSISTENT_RESERVE_OUT 0x5f
 #define VARLEN_CDB            0x7f
+#define EXTENDED_COPY         0x83		//Need soppurt by vmware
+#define RECEIVE_COPY_RESULTS  0x84		//Need soppurt by vmware
 #define READ_16               0x88
-#define COMPARE_AND_WRITE     0x89
+#define COMPARE_AND_WRITE     0x89		//Need soppurt by vmware
 #define WRITE_16              0x8a
 #define ORWRITE_16            0x8b
 #define WRITE_VERIFY_16       0x8e
 #define VERIFY_16	      0x8f
 #define PRE_FETCH_16          0x90
 #define SYNCHRONIZE_CACHE_16  0x91
-#define WRITE_SAME_16         0x93
+#define WRITE_SAME_16         0x93		//Need soppurt by vmware
 #define SERVICE_ACTION_IN     0x9e
 #define	SAI_READ_CAPACITY_16  0x10
 #define	SAI_GET_LBA_STATUS    0x12
@@ -137,21 +139,21 @@
 #define VOLUME_OVERFLOW     0x0d
 #define MISCOMPARE          0x0e
 
-#define TYPE_DISK           0x00
-#define TYPE_TAPE           0x01
+#define TYPE_DISK           0x00	//虚拟磁盘驱动器
+#define TYPE_TAPE           0x01	//虚拟磁带设备
 #define TYPE_PRINTER        0x02
 #define TYPE_PROCESSOR      0x03
 #define TYPE_WORM           0x04
-#define TYPE_MMC            0x05
+#define TYPE_MMC            0x05	//虚拟DVD驱动器
 #define TYPE_SCANNER        0x06
 #define TYPE_MOD            0x07
 
-#define TYPE_MEDIUM_CHANGER 0x08
+#define TYPE_MEDIUM_CHANGER 0x08	//虚拟媒体自动存储
 #define TYPE_COMM           0x09
 #define TYPE_RAID           0x0c
 #define TYPE_ENCLOSURE      0x0d
 #define TYPE_RBC	    0x0e
-#define TYPE_OSD	    0x11
+#define TYPE_OSD	    0x11	//虚拟对象的存储设备
 #define TYPE_NO_LUN         0x7f
 
 #define TYPE_PT	            0xff

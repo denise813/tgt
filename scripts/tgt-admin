@@ -301,7 +301,7 @@ sub add_targets {
 					if (defined $target_options{"controller_tid"}) {
 						$next_tid = $target_options{"controller_tid"};
 					}
- 
+
 					if (not defined $target_options{"driver"}) {
 						$target_options{"driver"} = $default_driver;
 					}

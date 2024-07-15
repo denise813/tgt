@@ -264,6 +264,9 @@ static int sbc_rw(int host_no, struct scsi_cmd *cmd)
 	tl  = scsi_rw_count(cmd->scb);
 
 	switch (cmd->scb[0]) {
+/** comment by hy 2020-09-21
+ * # 处理 scsi 命令集合
+ */
 	case READ_10:
 	case READ_12:
 	case READ_16:
@@ -396,6 +399,9 @@ static int sbc_rw(int host_no, struct scsi_cmd *cmd)
 		break;
 	}
 
+/** comment by hy 2020-09-21
+ * # 调用后端引擎处理
+ */
 	ret = cmd->dev->bst->bs_cmd_submit(cmd);
 	if (ret) {
 		key = HARDWARE_ERROR;
@@ -791,6 +797,10 @@ static struct device_type_template sbc_template = {
 	.lu_online	= spc_lu_online,
 	.lu_offline	= spc_lu_offline,
 	.lu_exit	= spc_lu_exit,
+/** comment by hy 2020-09-21
+ * # 操作中不能插入任何行,
+     其中写操作 对应的为 op 0x28 即sbc_rw
+ */
 	.ops		= {
 		{spc_test_unit,},
 		{spc_illegal_op,},

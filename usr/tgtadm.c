@@ -679,7 +679,7 @@ int main(int argc, char **argv)
 	}
 
 	if (mode == MODE_TARGET) {
-		if ((tid <= 0 && (op != OP_SHOW))) {
+		if (tid <= 0 && (op != OP_SHOW)) {
 			if (tid == 0)
 				eprintf("'tid' cannot be 0\n");
 			else

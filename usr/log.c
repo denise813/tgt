@@ -193,7 +193,7 @@ static int log_enqueue(int prio, const char *fmt, va_list ap)
 	if (la->head <= la->tail &&
 	    (len + sizeof(struct logmsg)) > (la->end - la->tail)) {
 		logdbg(stderr, "enqueue: rewind tail to %p\n", la->tail);
-			la->tail = la->start;
+		la->tail = la->start;
 	}
 
 	/* not enough space on head : drop msg */
@@ -354,14 +354,15 @@ static void log_sigsegv(void)
 	exit(1);
 }
 
-int log_init(char *program_name, int size, int daemon, int debug)
+/* modify begin by hy, 2020-09-20, BugId:123 原因: 应该使用 use_logger */
+int log_init(char *program_name, int size, int use_logger, int debug)
 {
 	is_debug = debug;
 
 	logdbg(stderr,"enter log_init\n");
 	log_name = program_name;
 
-	if (daemon) {
+	if (use_logger) {
 		struct sigaction sa_old;
 		struct sigaction sa_new;
 
@@ -386,6 +387,7 @@ int log_init(char *program_name, int size, int daemon, int debug)
 			return 0;
 		}
 
+		prctl(PR_SET_NAME, "tgtd_log", NULL, NULL, NULL);
 		/* flush on daemon's crash */
 		sa_new.sa_handler = (void*)log_sigsegv;
 		sigemptyset(&sa_new.sa_mask);
@@ -404,6 +406,7 @@ int log_init(char *program_name, int size, int daemon, int debug)
 
 	return 0;
 }
+/* modify end by hy, 2020-09-20 */
 
 void log_close(void)
 {

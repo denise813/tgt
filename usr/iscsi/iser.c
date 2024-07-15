@@ -92,7 +92,7 @@ char *iser_portal_addr;
 struct iscsi_sense_data {
 	uint16_t length;
 	uint8_t data[0];
-} __attribute__((__packed__));
+} __packed;
 
 static size_t buf_pool_sz_mb = DEFAULT_POOL_SIZE_MB;
 static int cq_vector = -1;
@@ -1353,8 +1353,8 @@ void iser_conn_free(struct iser_conn *conn)
 		free(conn->self_name);
 
 	conn->h.state = STATE_INIT;
-	dprintf("conn:%p freed\n", &conn->h);
 	free(conn);
+	dprintf("conn:%p freed\n", &conn->h);
 }
 
 static void iser_sched_conn_free(struct event_data *evt)

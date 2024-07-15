@@ -252,9 +252,15 @@ static void accept_connection(int afd, int events, void *data)
 	tcp_conn->fd = fd;
 	conn->tp = &iscsi_tcp;
 
+/** comment by hy 2020-09-19
+ * # 连接处理报文头
+ */
 	conn_read_pdu(conn);
 	set_non_blocking(fd);
 
+/** comment by hy 2020-09-20
+ * # 处理函数
+ */
 	ret = tgt_event_add(fd, EPOLLIN, iscsi_tcp_event_handler, conn);
 	if (ret) {
 		conn_exit(conn);
@@ -274,12 +280,18 @@ static void iscsi_tcp_event_handler(int fd, int events, void *data)
 {
 	struct iscsi_connection *conn = (struct iscsi_connection *) data;
 
+/** comment by hy 2020-09-19
+ * # 接收
+ */
 	if (events & EPOLLIN)
 		iscsi_rx_handler(conn);
 
 	if (conn->state == STATE_CLOSE)
 		dprintf("connection closed\n");
 
+/** comment by hy 2020-09-19
+ * # 发送
+ */
 	if (conn->state != STATE_CLOSE && events & EPOLLOUT)
 		iscsi_tx_handler(conn);
 
@@ -298,11 +310,7 @@ int iscsi_tcp_init_portal(char *addr, int port, int tpgt)
 	char addrstr[64];
 	void *addrptr = NULL;
 
-	if (port < 0 || port > 65535) {
-		errno = EINVAL;
-		eprintf("port out of range, %m\n");
-		return -errno;
-	}
+	port = port ? port : ISCSI_LISTEN_PORT;
 
 	memset(servname, 0, sizeof(servname));
 	snprintf(servname, sizeof(servname), "%d", port);
@@ -407,14 +415,8 @@ int iscsi_tcp_init_portal(char *addr, int port, int tpgt)
 
 int iscsi_add_portal(char *addr, int port, int tpgt)
 {
-	const char *addr_str = "";
-
 	if (iscsi_tcp_init_portal(addr, port, tpgt)) {
-		if (addr) {
-			addr_str = addr;
-		}
-		eprintf("failed to create/bind to portal %s:%d\n",
-			addr_str, port);
+		eprintf("failed to create/bind to portal %s:%d\n", addr, port);
 		return -1;
 	}
 
@@ -452,11 +454,22 @@ static int iscsi_tcp_init(void)
 	   for ipv4 and ipv6
 	*/
 	if (list_empty(&iscsi_portals_list)) {
+/** comment by hy 2020-09-19
+ * # 这里创建套接字,生成 iscsi_portal 加入列表
+     iscsi_tcp_init ->iscsi_add_portal->iscsi_tcp_init_portal
+     accept_connection
+     处理调度函数
+     iscsi_tcp_event_handler
+     在调度函数中创建连接标识
+ */
 		iscsi_add_portal(NULL, ISCSI_LISTEN_PORT, 1);
 	}
 
 	INIT_LIST_HEAD(&iscsi_tcp_conn_list);
 
+/** comment by hy 2020-09-19
+ * # 链接超时处理
+ */
 	nop_work.func = iscsi_tcp_nop_work_handler;
 	nop_work.data = &nop_work;
 	add_work(&nop_work, 1);
@@ -490,6 +503,9 @@ static int iscsi_tcp_conn_login_complete(struct iscsi_connection *conn)
 		if (target->tid != conn->tid)
 			continue;
 
+/** comment by hy 2020-09-22
+ * # 设置连接心跳间隔
+ */
 		tcp_conn->nop_count = target->nop_count;
 		tcp_conn->nop_interval = target->nop_interval;
 		tcp_conn->nop_tick = target->nop_interval;
